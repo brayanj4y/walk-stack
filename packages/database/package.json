@@ -10,6 +10,7 @@
         "typegen": "convex get-config && convex typegen"
     },
     "dependencies": {
+        "@convex-dev/workos-authkit": "^0.1.6",
         "convex": "^1.19.3"
     }
 }

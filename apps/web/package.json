@@ -12,8 +12,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@convex-dev/workos-authkit": "^0.1.6",
+    "@workos-inc/authkit-nextjs": "^2.15.0",
     "@workspace/database": "workspace:*",
     "@workspace/ui": "workspace:*",
+    "convex": "^1.32.0",
     "lucide-react": "^0.563.0",
     "next": "16.1.6",
     "next-themes": "^0.4.6",
