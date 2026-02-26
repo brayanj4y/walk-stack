@@ -6,7 +6,7 @@ export default defineSchema({
     name: v.optional(v.string()),
     email: v.optional(v.string()),
     image: v.optional(v.string()),
-    authKitId: v.optional(v.string()), // WorkOS user ID
+    authKitId: v.optional(v.string()),
   }).index("by_authKitId", ["authKitId"]),
 
   organizations: defineTable({
