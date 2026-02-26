@@ -10,6 +10,22 @@ export const authKit = new AuthKit<DataModel>(components.workOSAuthKit, {
     authFunctions,
 });
 
+
+function buildUserProfile(data: {
+    id: string;
+    email: string;
+    firstName?: string | null;
+    lastName?: string | null;
+    profilePictureUrl?: string | null;
+}) {
+    return {
+        authKitId: data.id,
+        email: data.email,
+        name: [data.firstName, data.lastName].filter(Boolean).join(" ") || undefined,
+        image: data.profilePictureUrl ?? undefined,
+    };
+}
+
 export const { authKitEvent } = authKit.events({
     "user.created": async (ctx, event) => {
         const existing = await ctx.db
@@ -19,15 +35,7 @@ export const { authKitEvent } = authKit.events({
 
         if (existing) return;
 
-        await ctx.db.insert("users", {
-            authKitId: event.data.id,
-            email: event.data.email,
-            name:
-                [event.data.firstName, event.data.lastName]
-                    .filter(Boolean)
-                    .join(" ") || undefined,
-            image: event.data.profilePictureUrl ?? undefined,
-        });
+        await ctx.db.insert("users", buildUserProfile(event.data));
     },
 
     "user.updated": async (ctx, event) => {
@@ -38,14 +46,7 @@ export const { authKitEvent } = authKit.events({
 
         if (!user) return;
 
-        await ctx.db.patch(user._id, {
-            email: event.data.email,
-            name:
-                [event.data.firstName, event.data.lastName]
-                    .filter(Boolean)
-                    .join(" ") || undefined,
-            image: event.data.profilePictureUrl ?? undefined,
-        });
+        await ctx.db.patch(user._id, buildUserProfile(event.data));
     },
 
     "user.deleted": async (ctx, event) => {
@@ -55,6 +56,13 @@ export const { authKitEvent } = authKit.events({
             .unique();
 
         if (!user) return;
+
+        const memberships = await ctx.db
+            .query("memberships")
+            .withIndex("by_user", (q) => q.eq("userId", user._id))
+            .collect();
+
+        await Promise.all(memberships.map((m) => ctx.db.delete(m._id)));
 
         await ctx.db.delete(user._id);
     },
